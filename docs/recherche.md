@@ -38,13 +38,13 @@ Naším unikátem je zachování designu jak vypínače, tak světla.
 
 ### Posible physical positions
 
-| place | chip | out | in  | power source| problem |
-| ----- | ---- | --- | --- | :---: | --- |
-| za vypínačem | ESP32 | ano | ano | el. síť | chybí nula |
-|   | jednočip | ne | ano | baterka |  |
-| u světla | ESP32 | ano | ne | el. síť | |
-| mimo dosah WiFi | jednočip | ano | ano | el. síť | 
-| | jednočip | ne | ano | baterka | 
+| place           | chip     | out | in  | power source | problem    |
+| --------------- | -------- | --- | --- | :----------: | ---------- |
+| za vypínačem    | ESP32    | ano | ano | el. síť      | chybí nula |
+|                 | jednočip | ne  | ano | baterka      |            |
+| u světla        | ESP32    | ano | ne  | el. síť      |            |
+| mimo dosah WiFi | jednočip | ano | ano | el. síť      |
+|                 | jednočip | ne  | ano | baterka      |
 
 ##### Legenda
 out - spínání světla/světelného obvodu  
