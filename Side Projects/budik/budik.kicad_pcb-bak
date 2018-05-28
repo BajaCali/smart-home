@@ -1514,7 +1514,7 @@
   )
 
   (module WS2812B:WS2812B (layer F.Cu) (tedit 53BEE615) (tstamp 5B15DD54)
-    (at 154.94 82.55)
+    (at 147.32 83.82)
     (path /5B0066E0)
     (fp_text reference LED1 (at 0 -4.7) (layer F.SilkS)
       (effects (font (size 1 1) (thickness 0.2)))
@@ -1618,7 +1618,7 @@
   )
 
   (module WS2812B:WS2812B (layer F.Cu) (tedit 53BEE615) (tstamp 5B15DDA6)
-    (at 160.02 85.09)
+    (at 152.4 86.36)
     (path /5B035638)
     (fp_text reference LED3 (at 0 -4.7) (layer F.SilkS)
       (effects (font (size 1 1) (thickness 0.2)))
@@ -1670,7 +1670,7 @@
   )
 
   (module WS2812B:WS2812B (layer F.Cu) (tedit 53BEE615) (tstamp 5B15DDCF)
-    (at 157.48 86.36)
+    (at 149.86 87.63)
     (path /5B00723B)
     (fp_text reference LED4 (at 0 -4.7) (layer F.SilkS)
       (effects (font (size 1 1) (thickness 0.2)))
@@ -1826,7 +1826,7 @@
   )
 
   (module WS2812B:WS2812B (layer F.Cu) (tedit 53BEE615) (tstamp 5B15DE4A)
-    (at 165.1 82.55)
+    (at 157.48 83.82)
     (path /5B03583D)
     (fp_text reference LED7 (at 0 -4.7) (layer F.SilkS)
       (effects (font (size 1 1) (thickness 0.2)))
@@ -1878,7 +1878,7 @@
   )
 
   (module WS2812B:WS2812B (layer F.Cu) (tedit 53BEE615) (tstamp 5B15DE73)
-    (at 160.02 82.55)
+    (at 152.4 83.82)
     (path /5B007386)
     (fp_text reference LED8 (at 0 -4.7) (layer F.SilkS)
       (effects (font (size 1 1) (thickness 0.2)))
@@ -1930,7 +1930,7 @@
   )
 
   (module WS2812B:WS2812B (layer F.Cu) (tedit 53BEE615) (tstamp 5B15DE9C)
-    (at 157.48 83.82)
+    (at 149.86 85.09)
     (path /5B035945)
     (fp_text reference LED9 (at 0 -4.7) (layer F.SilkS)
       (effects (font (size 1 1) (thickness 0.2)))
@@ -1982,7 +1982,7 @@
   )
 
   (module WS2812B:WS2812B (layer F.Cu) (tedit 53BEE615) (tstamp 5B15DEC5)
-    (at 158.75 85.09)
+    (at 151.13 86.36)
     (path /5B007423)
     (fp_text reference LED10 (at 0 -4.7) (layer F.SilkS)
       (effects (font (size 1 1) (thickness 0.2)))
@@ -2034,7 +2034,7 @@
   )
 
   (module WS2812B:WS2812B (layer F.Cu) (tedit 53BEE615) (tstamp 5B15DEEE)
-    (at 162.56 83.82)
+    (at 154.94 85.09)
     (path /5B035A4E)
     (fp_text reference LED11 (at 0 -4.7) (layer F.SilkS)
       (effects (font (size 1 1) (thickness 0.2)))
@@ -2086,7 +2086,7 @@
   )
 
   (module WS2812B:WS2812B (layer F.Cu) (tedit 53BEE615) (tstamp 5B15DF17)
-    (at 158.75 83.82)
+    (at 151.13 85.09)
     (path /5B0074C5)
     (fp_text reference LED12 (at 0 -4.7) (layer F.SilkS)
       (effects (font (size 1 1) (thickness 0.2)))
