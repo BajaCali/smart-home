@@ -1,39 +1,37 @@
 #!/usr/bin/env python
 
 from math import cos, sin, radians, pi
-from kicad.pcbnew.board import Board
+import pcbnew
 
-center = (153, 100)
-radius_led = 25
-radius_c = 21
+def fromMm(mm):
+    return 1000000 * mm
+
+center = (fromMm(50), fromMm(50))
+radius_led = fromMm(25)
 count = 12
 step = 360 / (count) / 180.0 * pi
 
-b = Board.load("NavigationThing.kicad_pcb")
+filename = "budik.kicad_pcb"
 
-for m in b.modules:
-    ref = m.native_obj.GetReference()
+b = pcbnew.LoadBoard(filename)
+
+m = b.GetModules()
+while True:
+    if not m:
+        break
+    ref = m.GetReference()
     if ref.startswith("LED"):
-        num = (int(ref[3:]) + count / 2) % count
+        num = int(ref[3:]) - 1
 
-        angle = 2 * pi - num * step
-        m.x = center[0] + radius_led * cos(angle)
-        m.y = center[1] + radius_led * sin(angle)
-        m.rotation = 3 * pi / 2. - angle
+        angle = num * step
+        m.SetOrientation(-(angle - pi / 2) * 1800 / pi)
+        c = m.GetPosition()
+        c.Set(int(center[0] + radius_led * cos(angle)), int(center[1] + radius_led * sin(angle)))
+        m.SetPosition(c)
 
         print("Diode: " + str(num))
-        print("({0}, {1})".format(m.x, m.y))
+    m = m.Next()
 
-    elif ref.startswith("C"):
-        num = (int(ref[1:]) + count / 2) % count
-        angle = (num - 1) * step
-        m.x = center[0] + radius_c * cos(angle)
-        m.y = center[1] + radius_c * sin(angle)
-        m.rotation = 3 * pi / 2. - angle
-
-        print("Capacitor: " + str(num))
-        print("({0}, {1})".format(m.x, m.y))
-
-b.save()
+b.Save(filename)
 
 print("Done")
