@@ -1,0 +1,13 @@
+{
+    "terminal.integrated.env.linux": {
+        "PATH": "/home/michal/.platformio/penv/bin:/home/michal/.platformio/penv:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin",
+        "PLATFORMIO_CALLER": "vscode"
+    },
+    "files.associations": {
+        "esp_gap_ble_api.h": "c",
+        "gpio.h": "c",
+        "esp_intr_alloc.h": "c",
+        "esp_timer.h": "c",
+        "nvs_flash.h": "c"
+    }
+}
