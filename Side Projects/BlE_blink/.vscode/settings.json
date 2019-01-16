@@ -2,5 +2,8 @@
     "terminal.integrated.env.osx": {
         "PATH": "/Users/michal/.platformio/penv/bin:/Users/michal/.platformio/penv:/Users/michal/bin:/Library/Frameworks/Python.framework/Versions/3.7/bin:/Users/michal/esp/xtensa-esp32-elf/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/X11/bin:/Users/michal/bin:/Library/Frameworks/Python.framework/Versions/3.7/bin:/Users/michal/esp/xtensa-esp32-elf/bin",
         "PLATFORMIO_CALLER": "vscode"
+    },
+    "files.associations": {
+        "sstream": "cpp"
     }
 }
