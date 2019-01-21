@@ -16,17 +16,18 @@
 #include "esp_bt_defs.h"
 #include "esp_gap_ble_api.h"
 
-extern "C" {
-    esp_ble_adv_params_t ble_adv_params = {
-        
-        adv_int_min : 0x20,
-        adv_int_max : 0x40,
-        adv_type : ADV_TYPE_NONCONN_IND,
-        own_addr_type  : BLE_ADDR_TYPE_PUBLIC,
-        channel_map : ADV_CHNL_ALL,
-        adv_filter_policy  : ADV_FILTER_ALLOW_SCAN_ANY_CON_ANY,
-    };
-}
+
+inline esp_ble_adv_params_t *get_add_ble_adv_params() 
+{
+    esp_ble_adv_params_t a;
+    a.adv_int_min = 0x20;
+    a.adv_int_max = 0x40;
+    a.adv_type = ADV_TYPE_NONCONN_IND;
+    a.own_addr_type  = BLE_ADDR_TYPE_PUBLIC;
+    a.channel_map = ADV_CHNL_ALL;
+    a.adv_filter_policy  = ADV_FILTER_ALLOW_SCAN_ANY_CON_ANY;
+    return &a;
+};
 
 static uint8_t adv_raw_data[30] = {0x02,0x01,0x06,0x1A,0xFF,0x4C,0x00,0x02,0x15,0xFD,
 								   0xA5,0x06,0x93,0xA4,0xE2,0x4F,0xB1,0xAF,0xCF,0xC6,
@@ -40,7 +41,7 @@ static void esp_gap_cb(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param_t *par
 		case ESP_GAP_BLE_ADV_DATA_RAW_SET_COMPLETE_EVT: 
 				
 			printf("ESP_GAP_BLE_ADV_DATA_RAW_SET_COMPLETE_EVT\n");
-			esp_ble_gap_start_advertising(&ble_adv_params);
+			esp_ble_gap_start_advertising(get_add_ble_adv_params());
 			break;			
 		
 		case ESP_GAP_BLE_ADV_START_COMPLETE_EVT:
