@@ -16,10 +16,15 @@
 #include "esp_bt_defs.h"
 #include "esp_gap_ble_api.h"
 
+namespace vypinac {
 
-inline esp_ble_adv_params_t *get_add_ble_adv_params() 
+uint8_t man_data[3] = {1, 2, 3};
+
+const char* name = "ADV_ESP";
+
+esp_ble_adv_params_t *get_ble_adv_params()
 {
-    esp_ble_adv_params_t a;
+    static esp_ble_adv_params_t a = {};    
     a.adv_int_min = 0x20;
     a.adv_int_max = 0x40;
     a.adv_type = ADV_TYPE_NONCONN_IND;
@@ -27,87 +32,85 @@ inline esp_ble_adv_params_t *get_add_ble_adv_params()
     a.channel_map = ADV_CHNL_ALL;
     a.adv_filter_policy  = ADV_FILTER_ALLOW_SCAN_ANY_CON_ANY;
     return &a;
-};
+}
 
-static uint8_t adv_raw_data[30] = {0x02,0x01,0x06,0x1A,0xFF,0x4C,0x00,0x02,0x15,0xFD,
-								   0xA5,0x06,0x93,0xA4,0xE2,0x4F,0xB1,0xAF,0xCF,0xC6,
-								   0xEB,0x07,0x64,0x78,0x25,0x00,0x00,0x00,0x00,0xC5};
+esp_ble_adv_data_t *get_adv_data(uint8_t *manufacturer_data, int manufacturer_data_len)
+{
+    static esp_ble_adv_data_t a = {};
+    a.include_name = true;
+    a.flag = ESP_BLE_ADV_FLAG_LIMIT_DISC | ESP_BLE_ADV_FLAG_BREDR_NOT_SPT;
+    a.appearance = 384;
+    a.manufacturer_len = manufacturer_data_len;
+    a.p_manufacturer_data = manufacturer_data;
+    return &a;
+}
 
 // GAP callback
 static void esp_gap_cb(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param_t *param)
 {
     switch (event) {
-			
-		case ESP_GAP_BLE_ADV_DATA_RAW_SET_COMPLETE_EVT: 
-				
-			printf("ESP_GAP_BLE_ADV_DATA_RAW_SET_COMPLETE_EVT\n");
-			esp_ble_gap_start_advertising(get_add_ble_adv_params());
-			break;			
-		
-		case ESP_GAP_BLE_ADV_START_COMPLETE_EVT:
-			
-			printf("ESP_GAP_BLE_ADV_START_COMPLETE_EVT\n");
-			if(param->adv_start_cmpl.status == ESP_BT_STATUS_SUCCESS) {
-				printf("Advertising started\n\n");
-			}
-			else printf("Unable to start advertising process, error code %d\n\n", param->scan_start_cmpl.status);
-			break;
-	
-		default:
-		
-			printf("Event %d unhandled\n\n", event);
-			break;
-	}
+        
+        case ESP_GAP_BLE_ADV_DATA_SET_COMPLETE_EVT: 
+                
+            printf("ESP_GAP_BLE_ADV_DATA_SET_COMPLETE_EVT\n");
+            esp_ble_gap_start_advertising(get_ble_adv_params());
+            break;      
+        
+        case ESP_GAP_BLE_ADV_START_COMPLETE_EVT:
+            
+            printf("ESP_GAP_BLE_ADV_START_COMPLETE_EVT\n");
+            if(param->adv_start_cmpl.status == ESP_BT_STATUS_SUCCESS) {
+                printf("Advertising started\n\n");
+            }
+            else printf("Unable to start advertising process, error code %d\n\n", param->scan_start_cmpl.status);
+            break;
+    
+        default:
+        
+            printf("Event %d unhandled\n\n", event);
+            break;
+    }
 }
 
 
-void vypinac::run()
+void run()
 {
-    std::cout << "I am vypinac. MacAddress: " << get_mac() << "\n";
+    esp_log_level_set("*", ESP_LOG_VERBOSE);
 
-    esp_err_t ret;
-
-    // Initialize NVS.
-    ret = nvs_flash_init();
-    if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
-        ESP_ERROR_CHECK(nvs_flash_erase());
-        ret = nvs_flash_init();
-    }
-    ESP_ERROR_CHECK( ret );
-
+    printf("BT broadcast\n\n");
+    
+    // set components to log only errors
+    esp_log_level_set("*", ESP_LOG_ERROR);
+    
+    // initialize nvs
+    ESP_ERROR_CHECK(nvs_flash_init());
+    printf("- NVS init ok\n");
+    
+    // release memory reserved for classic BT (not used)
     ESP_ERROR_CHECK(esp_bt_controller_mem_release(ESP_BT_MODE_CLASSIC_BT));
-
+    printf("- Memory for classic BT released\n");
+    
+    // initialize the BT controller with the default config
     esp_bt_controller_config_t bt_cfg = BT_CONTROLLER_INIT_CONFIG_DEFAULT();
-    ret = esp_bt_controller_init(&bt_cfg);
-    if (ret) {
-        ESP_LOGE("GAP", "%s initialize controller failed: %s\n", __func__, esp_err_to_name(ret));
-        return;
+    esp_bt_controller_init(&bt_cfg);
+    printf("- BT controller init ok\n");
+    
+    // enable the BT controller in BLE mode
+    esp_bt_controller_enable(ESP_BT_MODE_BLE);
+    printf("- BT controller enabled in BLE mode\n");
+    
+    // initialize Bluedroid library
+    esp_bluedroid_init();
+    esp_bluedroid_enable();
+    printf("- Bluedroid initialized and enabled\n");
+    
+    // register GAP callback function
+    ESP_ERROR_CHECK(esp_ble_gap_register_callback(esp_gap_cb));
+    printf("- GAP callback registered\n\n");
+    
+    // configure the adv data
+    ESP_ERROR_CHECK(esp_ble_gap_set_device_name(name));
+    ESP_ERROR_CHECK(esp_ble_gap_config_adv_data(get_adv_data(man_data, sizeof(man_data))));
+    printf("- ADV data configured\n\n");
     }
-
-    ret = esp_bt_controller_enable(ESP_BT_MODE_BLE);
-    if (ret) {
-        ESP_LOGE("GAP", "%s enable controller failed: %s\n", __func__, esp_err_to_name(ret));
-        return;
-    }
-    ret = esp_bluedroid_init();
-    if (ret) {
-        ESP_LOGE("GAP", "%s init bluetooth failed: %s\n", __func__, esp_err_to_name(ret));
-        return;
-    }
-    ret = esp_bluedroid_enable();
-    if (ret) {
-        ESP_LOGE("GAP", "%s enable bluetooth failed: %s\n", __func__, esp_err_to_name(ret));
-        return;
-    }
-    ret = esp_ble_gap_register_callback(esp_gap_cb);
-    if (ret) {
-        ESP_LOGE("GAP", "gap register error, error code = %x", ret);
-        return;
-    }
-
-	ret = esp_ble_gap_config_adv_data_raw(adv_raw_data, 30);
-    if (ret) {
-        ESP_LOGE("GAP", "gap config adv data raw error, error code = %x", ret);
-    }
-
-}
+} // namespace vypinac

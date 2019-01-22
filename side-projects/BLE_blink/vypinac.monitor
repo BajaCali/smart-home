@@ -1,2 +1,2 @@
 #!/usr/bin/env bash  
-$IDF_PATH/tools/idf_monitor.py --port /dev/cu.SLAB_USBtoUART7 .pioenvs/esp32dev/firmware.elf
+$IDF_PATH/tools/idf_monitor.py --port /dev/cu.SLAB_USBtoUART15 .pioenvs/esp32dev/firmware.elf

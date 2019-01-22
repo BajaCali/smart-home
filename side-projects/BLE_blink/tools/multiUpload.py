@@ -14,8 +14,9 @@ upload_cmd = env.subst('$UPLOADCMD')
 def getPorts():
     simultaneous_upload_ports = ARGUMENTS.get("SIMULTANEOUS_UPLOAD_PORTS")
     ports = map(lambda x: {"port": str.strip(x)}, b64decode(simultaneous_upload_ports).split(','))
-    if ports[0] == "AUTO":
+    if ports[0]["port"] == "AUTO":
         ports = util.get_serial_ports()
+        ports = filter(lambda x: x["port"].find("SLAB") != -1, ports)
     return ports
 
 returnCodes=[]
