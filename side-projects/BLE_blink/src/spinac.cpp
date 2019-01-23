@@ -45,8 +45,8 @@ namespace spinac {
             .scan_type              = BLE_SCAN_TYPE_ACTIVE,
             .own_addr_type          = BLE_ADDR_TYPE_PUBLIC,
             .scan_filter_policy     = BLE_SCAN_FILTER_ALLOW_ALL,
-            .scan_interval          = 0x50,
-            .scan_window            = 0x30
+            .scan_interval          = 0x50,  // setting .scan_interval & .scan_window will guarantee continous scaning 
+            .scan_window            = 0x50
         };
 
     // check if the device was already discovered
@@ -116,7 +116,7 @@ namespace spinac {
                         addDevice(param->scan_rst.bda);
                         printf("\nName of device: %s.\n", get_name(param->scan_rst.ble_adv, param->scan_rst.adv_data_len).c_str());
                     }
-                    
+
                 }
                 else if(param->scan_rst.search_evt == ESP_GAP_SEARCH_INQ_CMPL_EVT)
                     printf("Scan complete\n\n");
