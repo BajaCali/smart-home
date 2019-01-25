@@ -3,6 +3,8 @@
 #include <iostream>
 #include <cstdio>
 
+#include "driver/gpio.h"
+
 #include "nvs_flash.h"
 #include "esp_system.h"
 #include "esp_log.h"
@@ -17,6 +19,9 @@
 #include "esp_gap_ble_api.h"
 
 namespace vypinac {
+
+const gpio_num_t ISR_PIN = GPIO_NUM_35;
+int cnt = 0;
 
 uint8_t man_data[3] = {1, 2, 3};
 
@@ -72,6 +77,11 @@ static void esp_gap_cb(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param_t *par
     }
 }
 
+static void IRAM_ATTR gpio_isr_handler(void* arg)
+{
+    man_data[0] = gpio_get_level(ISR_PIN);
+    cnt++;
+}
 
 void run()
 {
@@ -112,5 +122,28 @@ void run()
     ESP_ERROR_CHECK(esp_ble_gap_set_device_name(name));
     ESP_ERROR_CHECK(esp_ble_gap_config_adv_data(get_adv_data(man_data, sizeof(man_data))));
     printf("- ADV data configured\n\n");
+
+    gpio_pad_select_gpio(ISR_PIN);
+    gpio_set_direction(ISR_PIN, GPIO_MODE_INPUT);
+    gpio_set_intr_type(ISR_PIN, GPIO_INTR_ANYEDGE);
+    gpio_install_isr_service(0);
+    gpio_isr_handler_add(ISR_PIN, gpio_isr_handler, (void*) 0);
+
+    gpio_pad_select_gpio(GPIO_NUM_25);
+    gpio_set_direction(GPIO_NUM_25, GPIO_MODE_OUTPUT);
+
+    int last_cnt = 0;
+    while(1)
+    {
+        vTaskDelay(100 / portTICK_RATE_MS);
+        if (cnt != last_cnt)
+        {
+            ESP_ERROR_CHECK(esp_ble_gap_config_adv_data(get_adv_data(man_data, sizeof(man_data))));
+            last_cnt = cnt;
+            printf("cnt: %6d man_data[0]: %d\n", cnt, man_data[0]);
+            gpio_set_level(GPIO_NUM_25, man_data[0]);
+        }
     }
+    }
+
 } // namespace vypinac
