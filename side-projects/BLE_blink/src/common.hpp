@@ -5,5 +5,7 @@
 const uint8_t ON = 0x01;
 const uint8_t OFF = 0x00;
 
+extern const char* name_adv;
+
 std::string get_mac();
 inline void delay(uint16_t secs);

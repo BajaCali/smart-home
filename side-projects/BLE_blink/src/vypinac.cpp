@@ -25,8 +25,6 @@ int cnt = 0;
 
 uint8_t man_data[3] = {1, 2, 3};
 
-const char* name = "ADV_ESP";
-
 esp_ble_adv_params_t *get_ble_adv_params()
 {
     static esp_ble_adv_params_t a = {};    
@@ -119,7 +117,7 @@ void run()
     printf("- GAP callback registered\n\n");
     
     // configure the adv data
-    ESP_ERROR_CHECK(esp_ble_gap_set_device_name(name));
+    ESP_ERROR_CHECK(esp_ble_gap_set_device_name(name_adv));
     ESP_ERROR_CHECK(esp_ble_gap_config_adv_data(get_adv_data(man_data, sizeof(man_data))));
     printf("- ADV data configured\n\n");
 

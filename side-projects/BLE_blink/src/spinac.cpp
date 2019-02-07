@@ -1,5 +1,6 @@
-#include "spinac.hpp"
 #include <iostream>
+#include <string.h>
+#include "spinac.hpp"
 #include "common.hpp"
 
 #include <driver/gpio.h>
@@ -35,6 +36,25 @@ namespace spinac {
         return "";
     }
 
+    uint8_t *get_man_data(uint8_t* data, int len)
+    {
+        for (int i = 0; i < len;)
+        {
+            int part_len = data[i];
+            if (data[i+1] == 0xFF) // 0xFF - flag for manufacturer data
+            {  
+                printf("Got man_data.\n");
+                uint8_t ret[part_len];
+                for (int j = 0; j < part_len; j++)
+                    ret[i] = data[i + j + 2];
+                return ret;
+            }
+            else
+                i += part_len;
+        }
+        return NULL;
+    }
+
     // array of found devices
     #define MAX_DISCOVERED_DEVICES 50
     esp_bd_addr_t discovered_devices[MAX_DISCOVERED_DEVICES];
@@ -45,7 +65,7 @@ namespace spinac {
             .scan_type              = BLE_SCAN_TYPE_ACTIVE,
             .own_addr_type          = BLE_ADDR_TYPE_PUBLIC,
             .scan_filter_policy     = BLE_SCAN_FILTER_ALLOW_ALL,
-            .scan_interval          = 0x50,  // setting .scan_interval & .scan_window will guarantee continous scaning 
+            .scan_interval          = 0x50,
             .scan_window            = 0x50
         };
 
@@ -85,7 +105,7 @@ namespace spinac {
                 printf("ESP_GAP_BLE_SCAN_PARAM_SET_COMPLETE_EVT\n");
                 if(param->scan_param_cmpl.status == ESP_BT_STATUS_SUCCESS) {
                     printf("Scan parameters set, start scanning for 10 seconds\n\n");
-                    esp_ble_gap_start_scanning(10);
+                    esp_ble_gap_start_scanning(0);
                 }
                 else printf("Unable to set scan parameters, error code %d\n\n", param->scan_param_cmpl.status);
                 break;
@@ -103,6 +123,8 @@ namespace spinac {
                 
                 if(param->scan_rst.search_evt == ESP_GAP_SEARCH_INQ_RES_EVT) {
                     
+                    std::string name = get_name(param->scan_rst.ble_adv, param->scan_rst.adv_data_len);
+
                     if(!alreadyDiscovered(param->scan_rst.bda)) { // TODO: tohle vymazat
                         
                         printf("ESP_GAP_BLE_SCAN_RESULT_EVT\n");
@@ -114,7 +136,16 @@ namespace spinac {
                         
                         printf("\n\n");
                         addDevice(param->scan_rst.bda);
-                        printf("\nName of device: %s.\n", get_name(param->scan_rst.ble_adv, param->scan_rst.adv_data_len).c_str());
+                        printf("\nName of device: %s.\n", name.c_str());
+                    }
+
+                    if ( strcmp(name.c_str(), name_adv) == 0) // printf("It's the adv_esp.\n");
+                    {
+                        printf("ADV_ESP found. Trying read data.\n");
+                        uint8_t *man_data = get_man_data(param->scan_rst.ble_adv, param->scan_rst.adv_data_len);
+                        if (man_data != NULL)
+                            printf("man_data[0]: %d", man_data[0]);
+                        // gpio_set_level(BLINK_GPIO, man_data[0]);
                     }
 
                 }
@@ -175,20 +206,24 @@ namespace spinac {
 	// configure scan parameters
 	esp_ble_gap_set_scan_params(&ble_scan_params);
 
+    gpio_pad_select_gpio(BLINK_GPIO);
+    gpio_set_direction(BLINK_GPIO, GPIO_MODE_OUTPUT);
+    gpio_set_level(BLINK_GPIO, 0);
 
 
-
+        /*
         std::cout << "I am spinac. MacAddress: " << get_mac() << "\n";
         gpio_pad_select_gpio(BLINK_GPIO);
-        /* Set the GPIO as a push/pull output */
+        // Set the GPIO as a push/pull output 
         gpio_set_direction(BLINK_GPIO, GPIO_MODE_OUTPUT);
         while(1) {
-            /* Blink off (output low) */
+            // Blink off (output low) 
             gpio_set_level(BLINK_GPIO, 0);
             vTaskDelay(1000 / portTICK_PERIOD_MS);
-            /* Blink on (output high) */
+            // Blink on (output high) 
             gpio_set_level(BLINK_GPIO, 1);
             vTaskDelay(1000 / portTICK_PERIOD_MS);
         }
+        */
     }
 }
