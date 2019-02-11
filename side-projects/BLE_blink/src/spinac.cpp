@@ -36,22 +36,51 @@ namespace spinac {
         return "";
     }
 
+    uint8_t get_first_byte_of_man_data(uint8_t* data, int len)
+    {
+        uint8_t a;
+        for (a = 1; data[a] != 0xFF && a < len; a++);
+        if (data[a] == 0xFF)
+        {
+            printf("\nFirst man_data byte on: %d\n", a+1);
+            return data[a+1];
+        }
+        return 0xFF;
+    }
+
     uint8_t *get_man_data(uint8_t* data, int len)
     {
-        for (int i = 0; i < len;)
+        uint8_t a;
+        for (a = 1; data[a] != 0xFF && a < len; a++);
+        if (data[a] == 0xFF)
         {
-            int part_len = data[i];
-            if (data[i+1] == 0xFF) // 0xFF - flag for manufacturer data
-            {  
-                printf("Got man_data.\n");
-                uint8_t ret[part_len];
-                for (int j = 0; j < part_len; j++)
-                    ret[i] = data[i + j + 2];
-                return ret;
+            uint8_t ret[len - a];
+            for (a = a + 1; a < len; a++)
+            {
+                ret[a] = data[a];
             }
-            else
-                i += part_len;
+            return ret;
         }
+        else
+        {
+            uint8_t ret[1];
+            ret[0] = 0xff;
+            return ret;
+        }
+        // for (int i = 0; i < len;)
+        // {
+        //     int part_len = data[i];
+        //     if (data[i+1] == 0xFF) // 0xFF - flag for manufacturer data
+        //     {  
+        //         printf("Got man_data.\n");
+        //         uint8_t ret[part_len];
+        //         for (int j = 0; j < part_len; j++)
+        //             ret[i] = data[i + j + 2];
+        //         return ret;
+        //     }
+        //     else
+        //         i += part_len;
+        // }
         return NULL;
     }
 
@@ -141,11 +170,13 @@ namespace spinac {
 
                     if ( strcmp(name.c_str(), name_adv) == 0) // printf("It's the adv_esp.\n");
                     {
-                        printf("ADV_ESP found. Trying read data.\n");
-                        uint8_t *man_data = get_man_data(param->scan_rst.ble_adv, param->scan_rst.adv_data_len);
-                        if (man_data != NULL)
-                            printf("man_data[0]: %d", man_data[0]);
-                        // gpio_set_level(BLINK_GPIO, man_data[0]);
+                        printf("ADV_ESP found. Trying read data.\nData: [0]=%X, rest: ", get_first_byte_of_man_data(param->scan_rst.ble_adv, param->scan_rst.adv_data_len));
+                        for (int i = 0; i < param->scan_rst.adv_data_len; i++)
+                            printf("%X ", param->scan_rst.ble_adv[i]);
+                        // uint8_t *man_data = get_man_data(param->scan_rst.ble_adv, param->scan_rst.adv_data_len);
+                        // if (man_data != NULL)
+                        //     printf("man_data[0]: %X\n", man_data[0]);
+                        gpio_set_level(BLINK_GPIO, get_first_byte_of_man_data(param->scan_rst.ble_adv, param->scan_rst.adv_data_len));
                     }
 
                 }

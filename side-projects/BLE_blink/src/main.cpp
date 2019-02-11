@@ -15,10 +15,11 @@ extern "C" void app_main()
     else
         vypinac::run();
 
+    printf("\nCode done.");
     while(true)
     {
         vTaskDelay(1000 / portTICK_PERIOD_MS);
-        printf("\n Hello world!");
+        printf(".");
     }
     
 }
