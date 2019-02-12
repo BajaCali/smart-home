@@ -19,6 +19,7 @@
 namespace spinac {
 
     gpio_num_t BLINK_GPIO = GPIO_NUM_27;
+    const uint8_t MAN_DATA_READ_ERR = 0xFF;
 
     std::string get_name(uint8_t* data, int len)
     {
@@ -40,12 +41,12 @@ namespace spinac {
     {
         uint8_t a;
         for (a = 1; data[a] != 0xFF && a < len; a++);
-        if (data[a] == 0xFF)
+        if (data[a] == 0xFF && len >= a+1)
         {
-            printf("\nFirst man_data byte on: %d\n", a+1);
+            printf("First man_data byte on: %d\n", a+1);
             return data[a+1];
         }
-        return 0xFF;
+        return MAN_DATA_READ_ERR;
     }
 
     uint8_t *get_man_data(uint8_t* data, int len)
@@ -154,7 +155,7 @@ namespace spinac {
                     
                     std::string name = get_name(param->scan_rst.ble_adv, param->scan_rst.adv_data_len);
 
-                    if(!alreadyDiscovered(param->scan_rst.bda)) { // TODO: tohle vymazat
+                    if(!alreadyDiscovered(param->scan_rst.bda)) {
                         
                         printf("ESP_GAP_BLE_SCAN_RESULT_EVT\n");
                         printf("Device found: ADDR=");
@@ -165,18 +166,21 @@ namespace spinac {
                         
                         printf("\n\n");
                         addDevice(param->scan_rst.bda);
-                        printf("\nName of device: %s.\n", name.c_str());
+                        printf("Name of new device is %s.\n", name.c_str());
                     }
 
-                    if ( strcmp(name.c_str(), name_adv) == 0) // printf("It's the adv_esp.\n");
+                    if ( strcmp(name.c_str(), name_adv) == 0) // checks for the right esp
                     {
-                        printf("ADV_ESP found. Trying read data.\nData: [0]=%X, rest: ", get_first_byte_of_man_data(param->scan_rst.ble_adv, param->scan_rst.adv_data_len));
+                        uint8_t first_byte_of_man_data = get_first_byte_of_man_data(param->scan_rst.ble_adv, param->scan_rst.adv_data_len);
+                        printf(" - ADV_ESP found.  man_data: [0]=%X, all: ", first_byte_of_man_data);
                         for (int i = 0; i < param->scan_rst.adv_data_len; i++)
                             printf("%X ", param->scan_rst.ble_adv[i]);
-                        // uint8_t *man_data = get_man_data(param->scan_rst.ble_adv, param->scan_rst.adv_data_len);
-                        // if (man_data != NULL)
-                        //     printf("man_data[0]: %X\n", man_data[0]);
-                        gpio_set_level(BLINK_GPIO, get_first_byte_of_man_data(param->scan_rst.ble_adv, param->scan_rst.adv_data_len));
+                        printf("\n");
+                        if (first_byte_of_man_data != MAN_DATA_READ_ERR)
+                        {
+                            gpio_set_level(BLINK_GPIO, first_byte_of_man_data);
+                            printf(" - Set pin no. %d to %d", BLINK_GPIO, first_byte_of_man_data);
+                        }
                     }
 
                 }
@@ -240,21 +244,5 @@ namespace spinac {
     gpio_pad_select_gpio(BLINK_GPIO);
     gpio_set_direction(BLINK_GPIO, GPIO_MODE_OUTPUT);
     gpio_set_level(BLINK_GPIO, 0);
-
-
-        /*
-        std::cout << "I am spinac. MacAddress: " << get_mac() << "\n";
-        gpio_pad_select_gpio(BLINK_GPIO);
-        // Set the GPIO as a push/pull output 
-        gpio_set_direction(BLINK_GPIO, GPIO_MODE_OUTPUT);
-        while(1) {
-            // Blink off (output low) 
-            gpio_set_level(BLINK_GPIO, 0);
-            vTaskDelay(1000 / portTICK_PERIOD_MS);
-            // Blink on (output high) 
-            gpio_set_level(BLINK_GPIO, 1);
-            vTaskDelay(1000 / portTICK_PERIOD_MS);
-        }
-        */
     }
 }
