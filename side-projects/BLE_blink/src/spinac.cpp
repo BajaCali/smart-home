@@ -49,42 +49,6 @@ namespace spinac {
         return MAN_DATA_READ_ERR;
     }
 
-    uint8_t *get_man_data(uint8_t* data, int len)
-    {
-        uint8_t a;
-        for (a = 1; data[a] != 0xFF && a < len; a++);
-        if (data[a] == 0xFF)
-        {
-            uint8_t ret[len - a];
-            for (a = a + 1; a < len; a++)
-            {
-                ret[a] = data[a];
-            }
-            return ret;
-        }
-        else
-        {
-            uint8_t ret[1];
-            ret[0] = 0xff;
-            return ret;
-        }
-        // for (int i = 0; i < len;)
-        // {
-        //     int part_len = data[i];
-        //     if (data[i+1] == 0xFF) // 0xFF - flag for manufacturer data
-        //     {  
-        //         printf("Got man_data.\n");
-        //         uint8_t ret[part_len];
-        //         for (int j = 0; j < part_len; j++)
-        //             ret[i] = data[i + j + 2];
-        //         return ret;
-        //     }
-        //     else
-        //         i += part_len;
-        // }
-        return NULL;
-    }
-
     // array of found devices
     #define MAX_DISCOVERED_DEVICES 50
     esp_bd_addr_t discovered_devices[MAX_DISCOVERED_DEVICES];
